@@ -8,33 +8,37 @@
 |  6109358 |
 +----------+
 
-#### 360k projects that use Python, have not been deleted, and were active in the past year (but really only last few months of 2016 since GitHub doesn't refresh often to update these dates)
+#### 160k active projects (have been committed to in past year, involve Python as MAIN language, and have not been deleted)
 ```
-SELECT COUNT(*) FROM (
-    SELECT project_id FROM project_languages
-    WHERE language='Python') t
-LEFT JOIN projects ON t.project_id = projects.id
-    WHERE projects.updated_at > DATE_SUB(now(), INTERVAL 1 YEAR)
-    AND projects.deleted <> 1;
+SELECT * FROM projects
+WHERE projects.id IN
+    (-- Project IDs which had commits in past MONTH
+        SELECT DISTINCT(recent_commits.project_id)
+        FROM recent_commits
+        WHERE recent_commits.created_at > DATE_SUB('2017-07-01 00:00:00', INTERVAL 1 YEAR)
+        AND recent_commits.created_at < '2017-07-01 00:00:00'
+    )
+AND projects.language = 'Python'
+AND projects.deleted <> 1;
 ```
-+----------+
-| COUNT(*) |
-+----------+
-|   363567 |
-+----------+
 
-#### So, I'll use projects created in the past 6 MONTHS since the most recent project update is appearing as `2016-12-15` anyway
+#### Oldest Python repo that's still active
+`SELECT id, name, url, created_at FROM active_projects ORDER BY created_at LIMIT 1;`
++--------+---------+------------------------------------------------+---------------------+
+| id     | name    | url                                            | created_at          |
++--------+---------+------------------------------------------------+---------------------+
+| 447228 | pysolar | https://api.github.com/repos/pingswept/pysolar | 2008-03-01 23:35:48 |
++--------+---------+------------------------------------------------+---------------------+
+https://github.com/pingswept/pysolar  
+The latest commit on this repo was 17 days ago as of 2017-08-31
+
+#### 113k users that have been involved in an active project as described above
 ```
-SELECT COUNT(*) FROM (
-    SELECT project_id
-    FROM project_languages
-    WHERE language='Python') t
-LEFT JOIN projects ON t.project_id = projects.id
-    WHERE projects.created_at > DATE_SUB(now(), INTERVAL 6 MONTH)
-    AND projects.deleted <> 1;
+SELECT * FROM users
+WHERE users.id IN (
+    SELECT DISTINCT(active_projects_1MONTH.owner_id)
+    FROM active_projects_1MONTH
+)
+AND users.fake <> 1
+AND users.deleted <> 1;
 ```
-+----------+
-| COUNT(*) |
-+----------+
-|   729466 |
-+----------+

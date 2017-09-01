@@ -1,4 +1,4 @@
-# Notes on project
+# Notes on github-collaborator project
 
 ### Starting MySQL on Ubuntu EC2 instance:
 https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-16-04
@@ -31,36 +31,56 @@ grant file on *.* to 'root'@'localhost';
 ```
 
 ### Config mySQL to allow loading files from anywhere:
-`cd /etc/mysql`
-`sudo vi my.cnf` (since anything in etc/ is read_only)
+`sudo vi /etc/mysql/my.cnf`
 Add to the end of my.cnf:
     ```
     [mysqld]
     secure-file-priv = ""
     ```
-### Config apparmor.d to include reading/writing to mysql in /db drive
-`cd /etc/apparmor.d/`
-Under the section '' add:
-```
+then restart mysql
+`sudo service mysql restart`
 
+### Config apparmor.d to include reading/writing to mysql in /db directories
+`sudo vi /etc/apparmor.d/usr.sbin.mysqld`
+Under the section '# Allow data dir access' add access to following directories:
 ```
+  /home/ubuntu/db/mysql/ r,
+  /home/ubuntu/db/mysql/** rwk,
+  /home/ubuntu/db/mysql-2017-07-01/ r,
+  /home/ubuntu/db/mysql-2017-07-01/** r,
+  /home/ubuntu/db/data/ r,
+  /home/ubuntu/db/data/** rwk,
+```
+then reload apparmor
+`sudo service apparmor reload`
+OR `sudo /etc/init.d/apparmor reload`
 
-### Load csv files into new database using script provided:  
+### Give mysql access to write to the data directory added above
+`cd /home/ubuntu/db`
+`sudo chown ubuntu:mysql data`
+
+### Load csv files into new database using ght-restore-mysql script   
 ```
 cd  mysql-2017-07-01
 ./ght-restore-mysql -u root -d ghtorrent_restore -p 0 .
 ```
 ---------
-### Reading before starting
+### Read after running into issues. (Hindsight is 20/20)
 Pitfalls of data mining github http://etc.leif.me/papers/Kalliamvakou2015a.pdf
+- Check the updated_at
+- created_at timestamp often occurs in 1970 and after present time. Clocks not configured correctly for those users. Use anyway as long as satisfied by other clauses?
+- Data from every field not always as up to date as the date the dump was created since GitHub does not update associated metadata in real-time across the entire site
 ---------
 ## Game Plan
 1. Get dataset loaded into mySQL db
-2. Query dataset to subset to repos containing Python, active within 6 months, haven't been deleted; and where owner of repo has not been deleted, is not fake, and is not an organization
-3. Create features that denote follows, stars, forks, and pull requests between users-repos
-4. Create a graph that maps the similarity between clusters of users-repos who interact
-5. Use graph to recommend other users or repos that the user within a cluster is similar to based on interactions
-https://medium.com/@keithwhor/using-graph-theory-to-build-a-simple-recommendation-engine-in-javascript-ec43394b35a3
+2. Query dataset to subset to repos containing Python, active within X months, haven't been deleted; and where user has not been deleted, is not fake, and has a connection to the subset repos
+3. Create relationships that denote follows, watches (stars), forks, and pull requests between users-repos nodes. Use Neo4j graph database to define these relationships
+4. Use Neo4j graph to find the similarity between clusters of users-repos who interact. aka find clusters of communities
+5. Use graph to recommend other users or repos that the user within a cluster/community is similar to based on 2nd-3rd degree connections.
+
+etc:
+- https://neo4j.com/developer/guide-build-a-recommendation-engine/
+- https://medium.com/@keithwhor/using-graph-theory-to-build-a-simple-recommendation-engine-in-javascript-ec43394b35a3
 
 ---------
 # Workflows for working on ssh and local
@@ -90,19 +110,28 @@ mysql ghtorrent_restore --password=0 < subset.sql | sed 's/\t/,/g' > followers10
 ```
 scp project:/home/ubuntu/db/followers10k.csv /Users/mac/Documents/DSI/github-collaborator/data/test_data
 ```
+
+## Add content before first line of file with sed
+`sed  -i '1i text goes here' filename`
+
+## Remove first line of file with sed
+`sed -i '1d' filename`
+
 -------
 ## Playing with SQL queries
 
 #### Some aggregative counts for number of rows in each table
-`SELECT table_name, TABLE_ROWS
+```
+SELECT table_name, TABLE_ROWS
 FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_SCHEMA = 'github';`
+WHERE TABLE_SCHEMA = 'github';
+```
 
 #### Select only projects containing Python
 `SELECT project_id FROM project_languages
 WHERE language = 'Python';`
 
-#### Select only projects updated within last 6 months
+#### Select only projects updated within last year
 `SELECT COUNT(*) FROM projects
 WHERE updated_at > DATE_SUB(now(), INTERVAL 1 YEAR)
 AND deleted <> 1
@@ -127,32 +156,108 @@ LIMIT 100000;`
 `select * from followers
 order by rand()
 limit 10000;`
+
+#### Copy a table from one db to another
+`CREATE TABLE github.commits SELECT * FROM ghtorrent_restore.commits;`
 -----------
 ## Funky Town
 
 - The most recently updated repo/project is `2016-12-16 10:00:49` in the newest 2017-07-01 data dump at GHTorrent. This is funky.
-    - GHTorrent mentioned this is likely due to GitHub not updating all their info every time a change is made in a repo. "GitHub only 'refreshes' every X months"
+    - "GitHub only 'refreshes' every X months", but GHTorrent confirmed the `updated_at` field is used by GHTorrent to denote when they last did a full refresh of that entry
 
 
 --------
 ## Subsetting the data
-1. Find repos using Python, active within past year or created in past month (see notes about this in 'Funky Town')
+1. Find repos using Python as main language, was not deleted, and had commits in the past 1 MONTH (see notes about this in 'Funky Town'). table: active_projects
 ```
-CREATE TABLE active_projects SELECT * FROM (
-    SELECT t.project_id, projects.owner_id, t.language, projects.language as main_lang,
-        t.python_bytes, projects.url, projects.name, projects.description,
-        projects.forked_from, projects.deleted, projects.updated_at, projects.created_at
-        FROM (
-            SELECT project_id, language, bytes as python_bytes
-            FROM project_languages
-            WHERE language='Python') t
-    LEFT JOIN projects ON t.project_id = projects.id
-        WHERE projects.updated_at > DATE_SUB('2017-07-01', INTERVAL 1 YEAR)
-        OR projects.created_at > DATE_SUB('2017-07-01', INTERVAL 1 MONTH)
-        AND projects.deleted <> 1
-    ) z;
+CREATE TABLE active_projects
+    SELECT * FROM projects
+    WHERE projects.id IN
+        (-- Project IDs which had commits in past MONTH
+            SELECT DISTINCT(recent_commits.project_id)
+            FROM recent_commits
+            WHERE recent_commits.created_at > DATE_SUB('2017-07-01 00:00:00', INTERVAL 1 YEAR)
+            AND recent_commits.created_at < '2017-07-01 00:00:00'
+        )
+    AND projects.language = 'Python'
+    AND projects.deleted <> 1;
 ```
-2.
+2. Find active users associated with the subset of projects. table: active_users
+```
+CREATE TABLE active_users
+SELECT * FROM users
+WHERE users.id IN (
+    SELECT DISTINCT(active_projects_1MONTH.owner_id)
+    FROM active_projects_1MONTH
+)
+AND users.fake <> 1
+AND users.deleted <> 1;
+```
+
+---------
+## Create graph database from the subset data using Neo4j
+
+1. Download neo4j and setup $PATH to run `cypher-shell` and `neo4j-shell`
+    - Ended up just using the browser GUI since the shell wasn't working well
+2. CSVs must be in the defaultdb `/Users/mac/Documents/Neo4j/default.graphdb/import` for neo4j for import in the browser to work (couldn't figure out the elusive neo4j.conf file remedy)
+```
+// Create repo nodes
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS
+FROM "file:///active_projects.csv" AS row
+CREATE (:Repo {repoID: row.id,
+               url: row.url,
+               userID: row.owner_id,
+               name: row.name,
+               mainLanguage: row.language,
+               repoCreated: row.created_at,
+               forkedFrom: row.forked_from
+               });
+// Create users
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS
+FROM "file:///active_users1.csv" AS row
+CREATE (:User {userID: row.id,
+               login: row.login,
+               company: row.company,
+               userCreated: row.created_at,
+               type: row.type,
+               countryCode: row.country_code,
+               state: row.state,
+               city: row.city
+               });
+```
+
+3. Create relationships between nodes
+```
+// Create relationship between follower to user (user-user)
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:///followers.csv" AS row
+MATCH (follower:User {userID: row.follower_id})
+MATCH (user:User {userID: row.user_id})
+MERGE (follower)-[:FOLLOWS]->(user);
+
+// Create relationship between original repo and forks (repo-repo)
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:///active_projects.csv" AS row
+MATCH (fork:Repo {repoID: row.id})
+MATCH (original:Repo {repoID: row.forked_from})
+MERGE (fork)-[:FORKED_FROM]->(original);
+
+// Create relationship between user and owned repos (user-repo)
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:///active_projects.csv" AS row
+MATCH (user:User {userID: row.owner_id})
+MATCH (repo:Repo {repoID: row.id})
+MERGE (user)-[:OWNS]->(repo);
+```
+
+--------
+## The Actual Recommendation Pipeline
+1. Use Neo4j graph to traverse graph from a User between 2nd and X degrees
+2. 
+
+
 ---------
 ## Clustering
 #### TF-IDF Matrix from commit messages:

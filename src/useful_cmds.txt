@@ -1,0 +1,20 @@
+-- Copy file from remote ssh to local machine
+scp project:/home/ubuntu/db/mysql-2017-07-01´/ght-restore-mysql /Users/mac/Desktop/
+
+-- sed version on terminal (doesn't escape quotes inside description field though)
+mysql -u root -p github -e "select id, url, owner_id, name, language, created_at, forked_from from active_projects" -B | sed "s/'/\'/;s/\t/\",\"/g;s/^/\"/;s/$/\"/;s/\n//g" > active_projects.csv
+mysql -u root -p github -e "select id, login, company, created_at, type, long, lat, country_code, state, city, location from active_users" -B | sed "s/'/\'/;s/\t/\",\"/g;s/^/\"/;s/$/\"/;s/\n//g" > active_users.csv
+mysql -u root -p github -e "select * from followers where user_id in (select distinct(user_id) from active_users)" -B | sed "s/'/\'/;s/\t/\",\"/g;s/^/\"/;s/$/\"/;s/\n//g" > followers.csv
+mysql -u root -p github -e "select * from organization_members" -B | sed "s/'/\'/;s/\t/\",\"/g;s/^/\"/;s/$/\"/;s/\n//g" > org_members.csv
+
+-- add header line back to csvs ONLY WORK IN UBUNTU
+sed -i '1i "id","url","owner_id","name","language","created_at","forked_from"' active_projects.csv
+sed -i '1i "id","login","company","created_at","type","fake","deleted","long","lat","country_code","state","city","location"' active_users.csv
+sed -i '1i "follower_id","user_id","created_at"' followers.csv
+sed -i '1i "org_id","user_id","create_id"' org_members.csv
+
+-- same sed commands as above but that work on macOSX
+sed -i '1i\
+> "follower_id","user_id","created_at"
+> ' followers.csv
+RETURN
