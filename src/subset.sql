@@ -1,5 +1,5 @@
 /*
-Create mt two classes of nodes for my graph: Repos and users
+Create my two classes of nodes for my graph: Repos and users
 by querying a subset of the massive data dump provided by GHTorrent
 */
 
@@ -23,19 +23,26 @@ CREATE TABLE active_projects
     AND projects.deleted <> 1;
 
 -- #2
--- Find active users associated with the subset of projects found above
+-- Find active users associated with the subset of projects found above.
+/* there's a many bot users which GHTorrent has already conviently marked as being "fake". We only
+want real users who can interact with the app to get collaboration recommendations */
 CREATE TABLE active_users
-SELECT * FROM users
-WHERE users.id IN (
-    SELECT DISTINCT(active_projects.owner_id)
-    FROM active_projects
-)
-AND users.fake <> 1
-AND users.deleted <> 1;
+    SELECT * FROM users
+    WHERE users.id IN (
+        SELECT DISTINCT(active_projects.owner_id)
+        FROM active_projects
+    )
+    AND users.fake <> 1
+    AND users.deleted <> 1;
 
 
 -----------------------------------
 -- IN PROGRESS QUERIES --
+
+-- Some aggregative counts for number of rows in each table
+SELECT table_name, TABLE_ROWS
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = 'github';
 
 -- Min/Max create and update dates from for active projects using python
 SELECT MIN(created_at) as c_from_date, MAX(created_at) as c_to_date,
@@ -93,12 +100,30 @@ AND projects.id IN (
     )
 AND projects.deleted <> 1;
 
+
+SELECT active_projects.id, GROUP_CONCAT(DISTINCT project_languages.language) AS languages
+FROM active_projects
+INNER JOIN project_languages ON active_projects.id = project_languages.project_id
+GROUP BY active_projects.id, project_languages.language
+limit 20;
+
+
+SELECT active_users.login, active_projects.name as repo_name
+INTO OUTFILE '/home/ubuntu/db/data/active_users_repos.csv'
+FIELDS TERMINATED BY ','
+OPTIONALLY ENCLOSED BY '\"'
+ESCAPED BY '\\'
+LINES TERMINATED BY '\n'
+FROM active_projects
+JOIN active_users ON active_users.id = active_projects.owner_id;
+
+
 -- Postgres version
 COPY (SELECT * FROM active_projects) TO '/home/ubuntu/db/data/active_projects.csv' WITH CSV header;
 -- mySQL version
 SELECT *
 INTO OUTFILE '/home/ubuntu/db/data/active_users.csv'
-FIELDS TERMINATED BY ','
+FIELDS TERMINATED BY '|'
 OPTIONALLY ENCLOSED BY '\"'
 ESCAPED BY '\\'
 LINES TERMINATED BY '\n'

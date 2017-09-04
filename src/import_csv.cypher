@@ -1,5 +1,8 @@
 // If doing this in neo4j browser, csv's must be in path: /Users/mac/Documents/Neo4j/default.graphdb/import
 
+CREATE CONSTRAINT ON (o:Repo) ASSERT o.repoID IS UNIQUE;
+CREATE CONSTRAINT ON (p:User) ASSERT p.userID IS UNIQUE;
+
 // Create repo nodes
 USING PERIODIC COMMIT
 LOAD CSV WITH HEADERS FROM
@@ -32,9 +35,6 @@ CREATE INDEX ON :User(userID);
 CREATE INDEX ON :User(login);
 CREATE INDEX ON :Repo(forkedFrom);
 
-CREATE CONSTRAINT ON (o:Repo) ASSERT o.repoID IS UNIQUE;
-CREATE CONSTRAINT ON (o:User) ASSERT o.userID IS UNIQUE;
-
 // Create relationship between follower to user (user-user)
 USING PERIODIC COMMIT
 LOAD CSV WITH HEADERS FROM "file:///followers.csv" AS row
@@ -62,6 +62,13 @@ LOAD CSV WITH HEADERS FROM "file:///org_members.csv" AS row
 MATCH (user:User {userID: row.user_id})
 MATCH (org:User {userID: row.org_id})
 MERGE (user)-[:MEMBER_OF]->(org);
+
+// Create relationship between user and repo stars (user-repo)
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:///watchers.csv" AS row
+MATCH (user:User {userID: row.user_id})
+MATCH (repo:Repo {repoID: row.repo_id})
+MERGE (user)-[:STARRED]->(repo);
 
 
 ---------------- FINDING RELATIONSHIPS BETWEEN NODES ------------------
