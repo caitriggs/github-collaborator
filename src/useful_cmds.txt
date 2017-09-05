@@ -16,6 +16,9 @@ sed -i '1i "id","login","company","created_at","type","fake","deleted","long","l
 sed -i '1i "follower_id","user_id","created_at"' followers.csv
 sed -i '1i "org_id","user_id","create_id"' org_members.csv
 
+sed -i '1i id\turl\towner_id\tname\tlanguage\tcreated_at\tforked_from' active_projects.csv
+sed -i '1i id\tlogin\tcompany\tcreated_at\ttype\tcountry_code\tstate\tcity\tlocation' active_users.csv
+
 -- same sed commands as above but that work on macOSX
 sed -i '1i\
 > "follower_id","user_id","created_at"

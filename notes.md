@@ -219,6 +219,12 @@ AND users.deleted <> 1;
 ---------
 ## Create graph database from the subset data using Neo4j
 
+#### Restart Neo4j on EC2 Ubuntu instance
+`sudo service neo4j restart`
+
+#### Change neo4j.conf configuration settings
+`sudo vi /etc/neo4j/neo4j.conf`
+
 #### Nodes:
 - User
 - Repo
@@ -312,6 +318,9 @@ https://networkx.readthedocs.io/en/stable/reference/convert.html
 
 #### Gephi: visualizing graphs
 https://gephi.org/users/quick-start/
+
+#### Neo4j, Cypher, and using Jupyter Notebook
+http://nicolewhite.github.io/neo4j-jupyter/hello-world.html
 
 other sites:
 https://blog.dominodatalab.com/social-network-analysis-with-networkx/

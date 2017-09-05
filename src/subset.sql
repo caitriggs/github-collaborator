@@ -118,12 +118,24 @@ FROM active_projects
 JOIN active_users ON active_users.id = active_projects.owner_id;
 
 
--- Postgres version
+-- PostgresSQL version
 COPY (SELECT * FROM active_projects) TO '/home/ubuntu/db/data/active_projects.csv' WITH CSV header;
+
+-- Replace
+UPDATE active_projects SET description = replace(description, '\t', ' ');
+
 -- mySQL version
-SELECT *
+SELECT id, url, owner_id, name, language, created_at, forked_from
+INTO OUTFILE '/home/ubuntu/db/data/active_projects.csv'
+FIELDS TERMINATED BY '\t'
+OPTIONALLY ENCLOSED BY '\"'
+ESCAPED BY '\\'
+LINES TERMINATED BY '\n'
+FROM active_projects;
+
+SELECT id, login, company, created_at, type, country_code, state, city, location
 INTO OUTFILE '/home/ubuntu/db/data/active_users.csv'
-FIELDS TERMINATED BY '|'
+FIELDS TERMINATED BY '\t'
 OPTIONALLY ENCLOSED BY '\"'
 ESCAPED BY '\\'
 LINES TERMINATED BY '\n'
