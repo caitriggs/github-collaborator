@@ -3,3 +3,5 @@ data_old/
 .ipynb_checkpoints/
 src/readme-data/
 *.DS_Store
+derby.log
+metastore_db/
