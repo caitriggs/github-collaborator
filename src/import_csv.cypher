@@ -75,6 +75,13 @@ MATCH (user:User {userID: toInt(row.user_id)})
 MATCH (repo:Repo {repoID: toInt(row.repo_id)})
 MERGE (user)-[:STARRED]->(repo);
 
+// Create relationship between user and repo forks (user-repo)
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS FROM "file:///home/ubuntu/db/data/watchers.csv" AS row
+MATCH (user:User {userID: toInt(row.user_id)})
+MATCH (repo:Repo {repoID: toInt(row.repo_id)})
+MERGE (user)-[:FORKED]->(repo);
+
 
 ---------------- FINDING RELATIONSHIPS BETWEEN NODES ------------------
 // Return a user and its immediate relationships

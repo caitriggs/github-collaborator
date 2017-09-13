@@ -114,8 +114,10 @@ WHERE projects.owner_id IN (
     FROM new_subset_users)
 OR projects.id IN (
     SELECT DISTINCT(new_subset_stars.repo_id)
-    FROM new_subset_stars)
-AND projects.deleted <> 1;
+    FROM new_subset_stars);
+
+-- Just to make sure deleted repos dont show up in recommendations
+DELETE FROM new_subset_repos WHERE deleted = 1;
 
 
 
