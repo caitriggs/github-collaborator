@@ -136,6 +136,18 @@ scp project:/home/ubuntu/db/followers10k.csv /Users/mac/Documents/DSI/github-col
 ## Remove first line of file with sed
 `sed -i '1d' filename`
 
+## Start Jupyter notebook on EC2 instance
+`jupyter notebook --no-browser`
+
+## SSH tunnel from EC2 jupyter notebook to my local machine browser jupyter
+Run on port 8899 on local machine
+`ssh -NfL localhost:9999:localhost:8888 project`
+
+## Check ssh tunnels
+
+## Get pySpark running in a Jupyter Notebook on EC2 instance
+https://blog.sicara.com/get-started-pyspark-jupyter-guide-tutorial-ae2fe84f594f
+
 -------
 ## Playing with SQL queries
 
@@ -190,31 +202,10 @@ CREATE TABLE github.commits SELECT * FROM ghtorrent_restore.commits;
 
 --------
 ## Subsetting the data
-1. Find repos using Python as main language, was not deleted, and had commits in the past 1 MONTH (see notes about this in 'Funky Town'). table: active_projects
-```
-CREATE TABLE active_projects
-    SELECT * FROM projects
-    WHERE projects.id IN
-        (-- Project IDs which had commits in past MONTH
-            SELECT DISTINCT(recent_commits.project_id)
-            FROM recent_commits
-            WHERE recent_commits.created_at > DATE_SUB('2017-07-01 00:00:00', INTERVAL 1 YEAR)
-            AND recent_commits.created_at < '2017-07-01 00:00:00'
-        )
-    AND projects.language = 'Python'
-    AND projects.deleted <> 1;
-```
+1. Find repos using Python, was not deleted, and had commits in the past 3 MONTHS (see notes about this in 'Funky Town'). table: active_projects
+    See subset.sql for query
 2. Find active users associated with the subset of projects. table: active_users
-```
-CREATE TABLE active_users
-SELECT * FROM users
-WHERE users.id IN (
-    SELECT DISTINCT(active_projects_1MONTH.owner_id)
-    FROM active_projects_1MONTH
-)
-AND users.fake <> 1
-AND users.deleted <> 1;
-```
+    See subset.sql for query
 
 ---------
 ## Create graph database from the subset data using Neo4j
