@@ -82,7 +82,10 @@ def evaluate_models(trained_models, testdf, metric='rmse'):
     return rmses, ranks
 
 if __name__ == '__main__':
+    print "Creating Spark dataframes"
     sp_train, sp_test = load_data_toSpark()
+    print "Grid Searching to find best model...t"
     best_model = bestModel_from_GridSearch(sp_train)
+    print "Calculating RMSE for test data"
     rmse, rank = evaluate_models([best_model], sp_test)
     print "Best model tests at RMSE: {} at rank {}".format(rmse[0], rank[0])
