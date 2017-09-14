@@ -34,7 +34,7 @@ def load_data_toSpark():
     return sp_train, sp_test
 
 def bestModel_from_GridSearch(sp_train):
-    als = ALS(nonnegative=True, coldStartStrategy=True)
+    als = ALS(nonnegative=True)
 
     paramGrid = ParamGridBuilder() \
         .addGrid(als.maxIter, [15, 40]) \
