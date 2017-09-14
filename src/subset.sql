@@ -120,6 +120,16 @@ OR projects.id IN (
 DELETE FROM new_subset_repos WHERE deleted = 1;
 
 
+----------------------------------
+-- Find commits per repo
+
+
+CREATE TABLE active_repo_commits
+SELECT * FROM commits_per_repo
+WHERE commits_per_repo.project_id IN (
+    SELECT DISTINCT(projects.id) FROM projects
+    WHERE projects.deleted <> 1
+);
 
 
 -----------------------------------
@@ -264,6 +274,32 @@ FROM active_follows;
 sed -i '1i user_id\tfollower_id\tcreated_at' active_follows.csv
 */
 
+// COMMITS
+SELECT *
+INTO OUTFILE '/home/ubuntu/db/data/commits_per_repo.csv'
+FIELDS TERMINATED BY '\t'
+OPTIONALLY ENCLOSED BY '\"'
+ESCAPED BY '\\'
+LINES TERMINATED BY '\n'
+FROM final_commits_per_repo;
+
+/* Add headers COMMITS
+sed -i '1i repo_id\tuser_id\tcommits' commits_per_repo.csv
+*/
+
+// USER-REPO LOOKUP
+SELECT *
+INTO OUTFILE '/home/ubuntu/db/data/user_repo_lookup.csv'
+FIELDS TERMINATED BY '\t'
+OPTIONALLY ENCLOSED BY '\"'
+ESCAPED BY '\\'
+LINES TERMINATED BY '\n'
+FROM user_repo_lookup_table;
+
+/* Add headers COMMITS
+sed -i '1i user_id\tlogin\trepo_id\tforked_from\trepo_name\turl' user_repo_lookup.csv
+*/
+
 -- Classmate usernames and ids
 SELECT id, login FROM users WHERE login IN
 ('caitriggs', 'ayadlin', 'sadahanu', 'Brionnic', 'NeverForged', 'gavin-peterkin',
@@ -355,3 +391,47 @@ LIMIT 20;
 delete from new_subset_users
 where id = 490051
 limit 1;
+
+
+----------------- NUMBER OF COMMITS PER REPO ---------------------
+
+CREATE TABLE active_repo_commits
+SELECT * FROM commits_per_repo
+WHERE commits_per_repo.project_id IN (
+    SELECT DISTINCT(projects.id) FROM projects
+    WHERE projects.deleted <> 1
+);
+
+CREATE TABLE commits_per_fork
+SELECT * FROM
+    (SELECT projects.forked_from, active_repo_commits.committer_id, active_repo_commits.commits
+    FROM projects
+    INNER JOIN active_repo_commits ON projects.id = active_repo_commits.project_id AND
+        projects.owner_id = active_repo_commits.committer_id) AS a
+WHERE a.forked_from IS NOT NULL;
+
+-- Find if any projects or forked projects are deleted
+SELECT COUNT(*) FROM commits_per_fork
+WHERE commits_per_fork.forked_from IN (
+    SELECT DISTINCT(projects.id)
+    FROM projects
+    WHERE projects.id = 1
+);
+
+-- Concat the commits_per_fork onto the active_repo_commits TABLE
+ALTER TABLE commits_per_fork CHANGE forked_from project_id int(11);
+
+-- Union two forks and repos tables
+CREATE TABLE final_commits_per_repo
+SELECT * FROM (
+    SELECT * FROM active_repo_commits
+    UNION ALL
+    SELECT * FROM commits_per_fork) AS a
+WHERE commits > 5;
+
+-- Create User-Repo Lookup Table
+CREATE TABLE user_repo_lookup_table
+SELECT users.id AS user_id, users.login,
+projects.id AS repo_id, projects.forked_from AS forked_from, projects.name AS repo_name, projects.url
+FROM projects
+INNER JOIN users ON projects.owner_id = users.id;
