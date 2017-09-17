@@ -300,6 +300,19 @@ FROM user_repo_lookup_table;
 sed -i '1i user_id\tlogin\trepo_id\tforked_from\trepo_name\turl' user_repo_lookup.csv
 */
 
+// STARS PER REPO
+SELECT *
+INTO OUTFILE '/home/ubuntu/db/data/stars_per_repo.csv'
+FIELDS TERMINATED BY '\t'
+OPTIONALLY ENCLOSED BY '\"'
+ESCAPED BY '\\'
+LINES TERMINATED BY '\n'
+FROM repo_stars;
+
+/* Add headers STARS PER REPO
+sed -i '1i repo_id\tstars' stars_per_repo.csv
+*/
+
 -- Classmate usernames and ids
 SELECT id, login FROM users WHERE login IN
 ('caitriggs', 'ayadlin', 'sadahanu', 'Brionnic', 'NeverForged', 'gavin-peterkin',
