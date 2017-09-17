@@ -1,0 +1,20 @@
+input[type=text] {
+  font-size: var(--font-normal);
+  padding: 0.25em;
+  background: rgba(50, 50, 50, 0.8);
+  color: var(--color-normal);
+  border: none;
+  height: 100%;
+  outline: none;
+}
+legend {
+  position: absolute;
+  top: -1.75em;
+  padding: 0.25em;
+  display: block;
+  background-color: var(--color-accent);
+  color: var(--color-text-base);
+}
+fieldset {
+  position: relative;
+}

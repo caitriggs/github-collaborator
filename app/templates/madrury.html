@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+<head>
+  <title>Repo Recommender</title>
+  <link rel="stylesheet" href="/static/styles/reset.css"/>
+  <link rel="stylesheet" href="/static/styles/base.css"/>
+  <link rel="stylesheet" href="/static/styles/grid.css"/>
+  <link rel="stylesheet" href="/static/styles/landing.css"/>
+  <link rel="stylesheet" href="/static/styles/header.css"/>
+  <link rel="stylesheet" href="/static/styles/buttons.css"/>
+  <link rel="stylesheet" href="/static/styles/form.css"/>
+  <link rel="stylesheet" href="/static/styles/reccs.css"/>
+</head>
+<body>
+
+  <main class="landing-page">
+    <div class="landing-bg"></div>
+    <header>
+      <div class="primary-col">
+        <h1>RepoReco</h1>
+      </div>
+    </header>
+
+    <section class="primary-col intro col-6">
+      <div class="intro-wrapper">
+        <div class="row space-bottom-none intro-text">
+          <h2 class="tagline">Find your match on GitHub.</h2>
+        </div>
+        <div class="row intro-text">
+          <p>See repo recommendations based on your activity.</p>
+        </div>
+
+        <form class="row login">
+          <fieldset class="login-username">
+            <input type="text" autocomplete="off" name="username" placeholder="Your GitHub username" class="col-12">
+          </fieldset>
+          <button class="login-submit cta cta-large">Get started</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="reccs hidden">
+      <div class="row">&nbsp;</div>
+      <div class="primary-col row">
+        <h2>Recommendations</h2>
+      </div>
+
+      <div class="row space-half">&nbsp;</div>
+
+      <div class="primary-col row recc-container">
+
+
+        <div class="recc-tile">
+          <a href="https://github.com/Theano/Theano" target="_blank">
+              <div class="recc-number">1</div>
+
+              <p class="repo-title">Theano</p>
+              <p class="repo-desc">Theano is a Python library that allows you to define,
+                  optimize, and evaluate mathematical expressions involving
+                  multi-dimensional arrays efficiently. It can use GPUs and perform
+                  efficient symbolic differentiation.</p>
+          </a>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">2</div>
+
+          <p class="repo-title">dmd</p>
+          <p class="repo-desc">dmd D Programming Language compiler</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">3</div>
+
+          <p class="repo-title">pylearn2</p>
+          <p class="repo-desc">Pylearn2 is a library designed to make machine
+              learning research easy.</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">4</div>
+
+          <p class="repo-title">cfme_tests</p>
+          <p class="repo-desc"></p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">5</div>
+
+          <p class="repo-title">k</p>
+          <p class="repo-desc">K is a rewrite-based executable semantic framework
+              in which programming languages, type systems and formal analysis tools
+              can be defined using configurations, computations and rules.</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">6</div>
+
+          <p class="repo-title">cloudify-cli</p>
+          <p class="repo-desc">The Cloudify command-line interface (CLI) is the
+              default method for interacting with the Cloudify management environment,
+              to manage your applications. It enables you to execute workflows on
+              your local machine, and to interact with a running Cloudify Manager
+              via SSH to upload and delete blueprints, create deployments, execute
+              workflows, retrieve events, and more.</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">7</div>
+
+          <p class="repo-title">bundy</p>
+          <p class="repo-desc">an authoritative DNS server </p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">8</div>
+
+          <p class="repo-title">gnustep-base</p>
+          <p class="repo-desc"></p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">9</div>
+          <p class="repo-title">kea</p>
+          <p class="repo-desc">Public Kea repository for easier
+              contribution processing</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+
+  // Focus the "Enter username" input field on page load
+  window.addEventListener('DOMContentLoaded', event => {
+    document.querySelector('input[type=text]').focus();
+  });
+
+  function hideIntroText() {
+    const elems = document.querySelectorAll('.intro-text');
+    elems.forEach(el => el.classList.add('hidden'));
+  }
+
+  const userNameForm = document.querySelector('form');
+  userNameForm.addEventListener('submit', event => {
+    // Prevent browser from reloading page
+    event.preventDefault();
+
+    const introWrapper = document.querySelector('.intro-wrapper');
+    introWrapper.classList.add('showing-results');
+
+    const reccs = document.querySelector('.reccs');
+    reccs.classList.remove('hidden');
+
+    //hideIntroText();
+
+  });
+  </script>
+
+</body>
+</html>

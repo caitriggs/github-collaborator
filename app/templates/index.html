@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+  <title>Repo Recommender</title>
+  <link rel="stylesheet" href="/static/styles/reset.css"/>
+  <link rel="stylesheet" href="/static/styles/base.css"/>
+  <link rel="stylesheet" href="/static/styles/grid.css"/>
+  <link rel="stylesheet" href="/static/styles/landing.css"/>
+  <link rel="stylesheet" href="/static/styles/header.css"/>
+  <link rel="stylesheet" href="/static/styles/buttons.css"/>
+  <link rel="stylesheet" href="/static/styles/form.css"/>
+  <link rel="stylesheet" href="/static/styles/reccs.css"/>
+</head>
+<body>
+
+  <main class="landing-page">
+    <div class="landing-bg"></div>
+    <header>
+      <div class="primary-col">
+        <h1>RepoReco</h1>
+      </div>
+    </header>
+
+    <section class="primary-col intro col-6">
+      <div class="intro-wrapper">
+        <div class="row space-bottom-none intro-text">
+          <h2 class="tagline">Find your match on GitHub.</h2>
+        </div>
+        <div class="row intro-text">
+          <p>See repo recommendations based on your activity.</p>
+        </div>
+
+        <form class="row login">
+          <fieldset class="login-username">
+            <input type="text" autocomplete="off" name="username" placeholder="Your GitHub username" class="col-12">
+          </fieldset>
+          <button class="login-submit cta cta-large">Get started</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="reccs hidden">
+      <div class="row">&nbsp;</div>
+      <div class="primary-col row">
+        <h2>Recommendations</h2>
+      </div>
+
+      <div class="row space-half">&nbsp;</div>
+
+      <div class="primary-col row recc-container">
+        <div class="recc-tile">
+          <div class="recc-number">1</div>
+
+          <p class="repo-title">amaJSON</p>
+          <p class="repo-desc">A Chrome extension for exporting notes
+            made on an Amazon Kindle as JSON</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">2</div>
+
+          <p class="repo-title">evaluating-recommenders</p>
+          <p class="repo-desc">Compute and plot NDCG for a recommender system</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">3</div>
+
+          <p class="repo-title">simpletable</p>
+          <p class="repo-desc">Simple tables in terminal with Go</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">4</div>
+
+          <p class="repo-title">amaJSON</p>
+          <p class="repo-desc">A Chrome extension for exporting notes
+            made on an Amazon Kindle as JSON</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">5</div>
+
+          <p class="repo-title">evaluating-recommenders</p>
+          <p class="repo-desc">Compute and plot NDCG for a recommender system</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">6</div>
+
+          <p class="repo-title">simpletable</p>
+          <p class="repo-desc">Simple tables in terminal with Go</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">7</div>
+
+          <p class="repo-title">amaJSON</p>
+          <p class="repo-desc">A Chrome extension for exporting notes
+            made on an Amazon Kindle as JSON</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">8</div>
+
+          <p class="repo-title">evaluating-recommenders</p>
+          <p class="repo-desc">Compute and plot NDCG for a recommender system</p>
+        </div>
+
+        <div class="recc-tile">
+          <div class="recc-number">9</div>
+          <p class="repo-title">simpletable</p>
+          <p class="repo-desc">Simple tables in terminal with Go</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+
+  // Focus the "Enter username" input field on page load
+  window.addEventListener('DOMContentLoaded', event => {
+    document.querySelector('input[type=text]').focus();
+  });
+
+  function hideIntroText() {
+    const elems = document.querySelectorAll('.intro-text');
+    elems.forEach(el => el.classList.add('hidden'));
+  }
+
+  const userNameForm = document.querySelector('form');
+  userNameForm.addEventListener('submit', event => {
+    // Prevent browser from reloading page
+    event.preventDefault();
+
+    const introWrapper = document.querySelector('.intro-wrapper');
+    introWrapper.classList.add('showing-results');
+
+    const reccs = document.querySelector('.reccs');
+    reccs.classList.remove('hidden');
+
+    //hideIntroText();
+
+  });
+  </script>
+
+</body>
+</html>

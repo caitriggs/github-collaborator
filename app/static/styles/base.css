@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css?family=Oxygen');
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: 'Oxygen', sans-serif;
+
+  --color-accent: rgb(207, 8, 18);
+  --color-base-text: rgb(255, 255, 255);
+
+  /* --color-heading: rgb(148, 216, 242); */
+  --gutter-width: 2rem;
+
+  --font-small: 1rem;
+  --font-normal: 1.5rem;
+  --font-large: 2.5rem;
+
+  --space-bottom-small: 1rem;
+  --space-bottom-normal: 1.5rem;
+  --space-bottom-large: 2rem;
+}
+
+h1 {
+  font-size: var(--font-large);
+  color: var(--color-accent);
+}
+
+h2 {
+  font-size: var(--font-normal);
+}
+
+h2, h3, h4, h5 {
+  color: var(--color-base-text);
+}
+
+p {
+  font-size: var(--font-normal);
+  line-height: 1.5em;
+}
+.hidden {
+  display: none;
+}

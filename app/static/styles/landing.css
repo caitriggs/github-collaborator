@@ -1,0 +1,40 @@
+.intro {
+  display: flex;
+  justify-content: left;
+  width: 100%;
+}
+.intro-wrapper {
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  transition: height ease 1s;
+}
+.showing-results {
+  height: 35vh;
+}
+.landing-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.45;
+  z-index: 1;
+  background: url(../images/landing-bg-2.jpg) no-repeat;
+  background-size: cover;
+  height: 100%;
+  width: 100%;
+}
+
+.tagline {
+  font-size: var(--font-large);
+}
+.login {
+  display: flex;
+  max-width: 50rem;
+}
+.login-username {
+  flex: 4;
+}
+.login-submit {
+  flex: 2;
+}

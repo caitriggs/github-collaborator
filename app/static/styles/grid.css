@@ -1,0 +1,25 @@
+.primary-col {
+  position: relative;
+  z-index: 2;
+  max-width: 60rem;
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: var(--gutter-width);
+  padding-right: var(--gutter-width);
+}
+.row {
+  padding-bottom: var(--space-bottom-normal);
+}
+.space-half {
+  padding-bottom: 0;
+}
+.col-6 {
+  width: 50%;
+}
+.col-12 {
+  width: 100%;
+}
+.space-bottom-none {
+  padding-bottom: 0;
+}

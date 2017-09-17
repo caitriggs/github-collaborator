@@ -1,0 +1,24 @@
+.repo-selected {
+  display: flex;
+  height: 25rem;
+  border-bottom: solid #fff 1px;
+}
+.repo-info-wrapper {
+  flex: 3;
+  padding-right: var(--gutter-width);
+}
+.repo-square-wrapper {
+  flex: 2;
+}
+.repo-square {
+  display: block;
+  height: 100%;
+  width: 100%;
+  font-size: 10vw;
+  word-break: break-all;
+
+  background: linear-gradient(
+    rgba(231, 76, 60,1.0),
+    rgba(255, 76, 60,1.0)
+  );
+}

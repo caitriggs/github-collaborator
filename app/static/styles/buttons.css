@@ -1,0 +1,12 @@
+a {
+  text-decoration: none;
+}
+.cta {
+  font-size: var(--font-normal);
+  background-color: var(--color-accent);
+  color: var(--color-base-text);
+  padding: 0.5em 1.5em;
+  display: inline-block;
+}
+.cta-large {
+}
