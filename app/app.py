@@ -23,4 +23,4 @@ def get_torvalds():
     return render_template('torvalds.html')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5001)
