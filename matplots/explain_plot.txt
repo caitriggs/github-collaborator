@@ -1,0 +1,3 @@
+RMSE.png : Train/Test/Mean Root Mean Squared Errors across Latent Features for explicit ratings data (2:star, 4:forked) using regParam/lambda = 0.10
+
+
