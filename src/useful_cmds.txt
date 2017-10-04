@@ -23,4 +23,3 @@ sed -i '1i\
 RETURN
 
 "repo_id","user_id","created_at"
-▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
