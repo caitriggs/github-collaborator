@@ -118,7 +118,6 @@ create_empty_file(log_file_path)
 
 logger = get_logger(get_log_file_name())
 
-#get_readme_file("codyromano", "fitbank-android")
 
 if __name__ == '__main__':
     with open('../data/users_projects.csv', 'rb') as csvfile:
