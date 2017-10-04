@@ -4,4 +4,4 @@ data_old/
 src/readme-data/
 *.DS_Store
 derby.log
-metastore_db/
+metastore_db
